@@ -1,8 +1,8 @@
-(* This source code is released in the Public Domain *)
+(* This source code is released into the Public Domain *)
 
 type 'a t
   (** A hash table containing values of different types.
-      The type parameter ['a] represent the type of the keys. *)
+      The type parameter ['a] represents the type of the keys. *)
 
 val create : int -> 'a t
   (** [create n] creates a hash table of initial size [n]. *)

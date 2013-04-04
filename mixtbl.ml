@@ -1,4 +1,4 @@
-(* This source code is released in the Public Domain *)
+(* This source code is released into the Public Domain *)
 
 type 'a t = ('a, (unit -> unit)) Hashtbl.t
 
