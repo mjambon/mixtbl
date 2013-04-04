@@ -11,7 +11,7 @@ let access () =
     try
       (Hashtbl.find tbl k) ();
       let result = !r in
-      r := None; (* clean up here in order avoid memory leak *)
+      r := None; (* clean up here in order to avoid memory leak *)
       result
     with Not_found -> None
   in
