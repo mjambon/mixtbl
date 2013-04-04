@@ -1,4 +1,4 @@
-Toy implementation of a statically-typed hash table holding values
+Toy OCaml implementation of a statically-typed hash table holding values
 of different types.
 
 For actual use, you probably want to include a number of functions from
