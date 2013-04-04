@@ -7,10 +7,11 @@ let create n = Hashtbl.create n
 let access () =
   let r = ref None in
   let get tbl k =
+    r := None; (* reset state in case last operation was not a get *)
     try
       (Hashtbl.find tbl k) ();
       let result = !r in
-      r := None;
+      r := None; (* clean up here in order avoid memory leak *)
       result
     with Not_found -> None
   in
