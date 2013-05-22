@@ -1,0 +1,4 @@
+.*.swp
+*.cmo
+*.cmi
+tests
