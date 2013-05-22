@@ -16,3 +16,39 @@ val access : unit -> ('a t -> 'a -> 'b option) * ('a t -> 'a -> 'b -> unit)
      the matching getter.
      The same getters and setters may be reused across multiple tables.
   *)
+
+val get : 'a t -> getter:('a t -> 'a -> 'b option) -> 'a -> 'b option
+
+val set : 'a t -> setter:('a t -> 'a -> 'b -> unit) -> 'a -> 'b -> unit
+
+val length : 'a t -> int
+  (** Number of bindings *)
+
+val clear : 'a t -> unit
+  (** Clear content of the hashtable *)
+
+val remove : 'a t -> 'a -> unit
+  (** Remove the binding for this key *)
+
+val copy : 'a t -> 'a t
+  (** Copy of the table *)
+
+val mem : 'a t -> getter:('a t -> 'a -> 'b option) -> 'a -> bool
+  (** Is the given key in the table, with the right type? *)
+
+val find : 'a t -> getter:('a t -> 'a -> 'b option) -> 'a -> 'b
+  (** Find the value for the given key, which must be of the right type.
+      raises Not_found if either the key is not found, or if its value
+      doesn't belong to the right type *)
+
+val iter_keys : 'a t -> ('a -> unit) -> unit
+  (** Iterate on the keys of this table *)
+
+val fold_keys : 'a t -> 'b -> ('b -> 'a -> 'b) -> 'b
+  (** Fold over the keys *)
+
+val keys : 'a t -> 'a list
+  (** List of the keys *)
+
+val bindings : 'a t -> getter:('a t -> 'a -> 'b option) -> ('a * 'b) list
+  (** All the bindings that come from the corresponding setter *)

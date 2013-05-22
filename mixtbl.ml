@@ -20,3 +20,41 @@ let access () =
     Hashtbl.replace tbl k (fun () -> r := v_opt)
   in
   get, set
+
+let get tbl ~getter x = getter tbl x
+
+let set tbl ~setter x y = setter tbl x y
+
+let length tbl = Hashtbl.length tbl
+
+let clear tbl = Hashtbl.clear tbl
+
+let remove tbl x = Hashtbl.remove tbl x
+
+let copy tbl = Hashtbl.copy tbl
+
+let mem tbl ~getter x =
+  match getter tbl x with
+  | None -> false
+  | Some _ -> true
+
+let find tbl ~getter x =
+  match getter tbl x with
+  | None -> raise Not_found
+  | Some y -> y
+
+let iter_keys tbl f =
+  Hashtbl.iter (fun x _ -> f x) tbl
+
+let fold_keys tbl acc f =
+  Hashtbl.fold (fun x _ acc -> f acc x) tbl acc
+
+let keys tbl =
+  Hashtbl.fold (fun x _ acc -> x :: acc) tbl []
+
+let bindings tbl ~getter =
+  fold_keys tbl []
+    (fun acc k ->
+      match getter tbl k with
+      | None -> acc
+      | Some v -> (k, v) :: acc)
