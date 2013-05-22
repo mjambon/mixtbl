@@ -3,23 +3,28 @@
 type 'a t
   (** A hash table containing values of different types.
       The type parameter ['a] represents the type of the keys. *)
+and ('a, 'b) injection
 
 val create : int -> 'a t
   (** [create n] creates a hash table of initial size [n]. *)
 
-val access : unit -> ('a t -> 'a -> 'b option) * ('a t -> 'a -> 'b -> unit)
+val access : unit -> ('a, 'b) injection
   (**
-     Return a pair (get, set) that works for a given type of values.
+     Return a value that works for a given type of values.
      This function is normally called once for each type of value.
-     Several getter/setter pairs may be created for the same type,
+     Several injections may be created for the same type,
      but a value set with a given setter can only be retrieved with
      the matching getter.
-     The same getters and setters may be reused across multiple tables.
+     The same injection can be reused across multiple tables (although
+     not in a thread-safe way).
   *)
 
-val get : 'a t -> getter:('a t -> 'a -> 'b option) -> 'a -> 'b option
+val get : inj:('a, 'b) injection -> 'a t  -> 'a -> 'b option
+  (** Get the value corresponding to this key, if it exists and
+      belongs to the same injection *)
 
-val set : 'a t -> setter:('a t -> 'a -> 'b -> unit) -> 'a -> 'b -> unit
+val set : inj:('a, 'b) injection -> 'a t -> 'a -> 'b -> unit
+  (** Bind the key to the value, using [inj] *)
 
 val length : 'a t -> int
   (** Number of bindings *)
@@ -33,10 +38,10 @@ val remove : 'a t -> 'a -> unit
 val copy : 'a t -> 'a t
   (** Copy of the table *)
 
-val mem : 'a t -> getter:('a t -> 'a -> 'b option) -> 'a -> bool
+val mem : inj:('a, _) injection -> 'a t -> 'a -> bool
   (** Is the given key in the table, with the right type? *)
 
-val find : 'a t -> getter:('a t -> 'a -> 'b option) -> 'a -> 'b
+val find : inj:('a, 'b) injection -> 'a t -> 'a -> 'b
   (** Find the value for the given key, which must be of the right type.
       raises Not_found if either the key is not found, or if its value
       doesn't belong to the right type *)
@@ -50,5 +55,5 @@ val fold_keys : 'a t -> 'b -> ('b -> 'a -> 'b) -> 'b
 val keys : 'a t -> 'a list
   (** List of the keys *)
 
-val bindings : 'a t -> getter:('a t -> 'a -> 'b option) -> ('a * 'b) list
-  (** All the bindings that come from the corresponding setter *)
+val bindings : inj:('a, 'b) injection -> 'a t -> ('a * 'b) list
+  (** All the bindings that come from the corresponding injection *)

@@ -1,12 +1,16 @@
 (* This source code is released into the Public Domain *)
 
 type 'a t = ('a, (unit -> unit)) Hashtbl.t
+and ('a, 'b) injection = {
+  getter : 'a t -> 'a -> 'b option;
+  setter : 'a t -> 'a -> 'b -> unit;
+}
 
 let create n = Hashtbl.create n
 
 let access () =
   let r = ref None in
-  let get tbl k =
+  let getter tbl k =
     r := None; (* reset state in case last operation was not a get *)
     try
       (Hashtbl.find tbl k) ();
@@ -15,15 +19,15 @@ let access () =
       result
     with Not_found -> None
   in
-  let set tbl k v =
+  let setter tbl k v =
     let v_opt = Some v in
     Hashtbl.replace tbl k (fun () -> r := v_opt)
   in
-  get, set
+  { getter; setter; }
 
-let get tbl ~getter x = getter tbl x
+let get ~inj tbl x = inj.getter tbl x
 
-let set tbl ~setter x y = setter tbl x y
+let set ~inj tbl x y = inj.setter tbl x y
 
 let length tbl = Hashtbl.length tbl
 
@@ -33,13 +37,13 @@ let remove tbl x = Hashtbl.remove tbl x
 
 let copy tbl = Hashtbl.copy tbl
 
-let mem tbl ~getter x =
-  match getter tbl x with
+let mem ~inj tbl x =
+  match inj.getter tbl x with
   | None -> false
   | Some _ -> true
 
-let find tbl ~getter x =
-  match getter tbl x with
+let find ~inj tbl x =
+  match inj.getter tbl x with
   | None -> raise Not_found
   | Some y -> y
 
@@ -52,9 +56,9 @@ let fold_keys tbl acc f =
 let keys tbl =
   Hashtbl.fold (fun x _ acc -> x :: acc) tbl []
 
-let bindings tbl ~getter =
+let bindings ~inj tbl =
   fold_keys tbl []
     (fun acc k ->
-      match getter tbl k with
+      match inj.getter tbl k with
       | None -> acc
       | Some v -> (k, v) :: acc)
