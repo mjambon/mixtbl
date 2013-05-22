@@ -1,4 +1,4 @@
-.PHONY: default all opt install uninstall reinstall clean test
+.PHONY: default all opt install uninstall reinstall clean tests
 default: all opt
 all:
 	ocamlc -c -g mixtbl.mli
@@ -6,7 +6,7 @@ all:
 opt:
 	ocamlopt -c -g mixtbl.mli
 	ocamlopt -c -g mixtbl.ml
-test: all
+tests: all
 	ocamlfind ocamlc -I src -I $$( ocamlfind query oUnit) \
 		unix.cma oUnit.cma mixtbl.cmo tests.ml -o tests
 clean:
