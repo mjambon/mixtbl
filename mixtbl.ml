@@ -1,7 +1,8 @@
 (* This source code is released into the Public Domain *)
 
 type 'a t = ('a, (unit -> unit)) Hashtbl.t
-and ('a, 'b) injection = {
+
+type ('a, 'b) injection = {
   getter : 'a t -> 'a -> 'b option;
   setter : 'a t -> 'a -> 'b -> unit;
 }

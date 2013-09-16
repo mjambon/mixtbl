@@ -1,55 +1,46 @@
-Toy OCaml implementation of a statically-typed hash table holding values
-of different types.
+# Mixtbl
 
-For actual use, you probably want to include a number of functions from
-the standard Hashtbl module and a way to iterate over the keys.
+Small [OCaml](http://caml.inria.fr/) implementation of a statically-typed hash
+table holding values of different types.
 
-Demo:
+The API differs significantly from
+[Martin Jambon's initial code](https://github.com/mjambon/mixtbl). To access
+a table for values of type `'a`, one needs to create an `'a injection`
+using the `access` function. Then, values put in the table using a given
+`'a injection` can be retrieved only with the same `'a injection`.
+
+## Tests
+
+Unit tests can be found in `tests.ml`. They demonstrate a basic usage of the
+module, and also check some invariants using `OUnit`.
+
+Tests can be run using
+
+```shell
+$ make tests
+$ ./tests
+```
+
+assuming you installed `OUnit` (for instance with `opam install ounit`.
+
+## Demo
+
+Excerpt from the tests:
+
 ```ocaml
-$ ocaml
-        OCaml version 4.00.1
-
-# #use "topfind";;
-- : unit = ()
-Findlib has been successfully loaded. Additional directives:
-  #require "package";;      to load a package
-  #list;;                   to list the available packages
-  #camlp4o;;                to load camlp4 (standard syntax)
-  #camlp4r;;                to load camlp4 (revised syntax)
-  #predicates "p,q,...";;   to set these predicates
-  Topfind.reset();;         to force that packages will be reloaded
-  #thread;;                 to enable threads
-
-- : unit = ()
-# #require "mixtbl";;
-/home/martin/dev/mn/powder/lib/ocaml/site-lib/mixtbl: added to search path
-/home/martin/dev/mn/powder/lib/ocaml/site-lib/mixtbl/mixtbl.cmo: loaded
-# let get_int, set_int = Mixtbl.access ();;
-val get_int : '_a Mixtbl.t -> '_a -> '_b option = <fun>
-val set_int : '_a Mixtbl.t -> '_a -> '_b -> unit = <fun>
-# let tbl = Mixtbl.create 10;;
-val tbl : '_a Mixtbl.t = <abstr>
-# get_int tbl "a";;
-- : '_a option = None
-# set_int tbl "a" 1;;
-- : unit = ()
-# get_int tbl "a";;
-- : int option = Some 1
-# let get_string, set_string = Mixtbl.access ();;
-val get_string : '_a Mixtbl.t -> '_a -> '_b option = <fun>
-val set_string : '_a Mixtbl.t -> '_a -> '_b -> unit = <fun>
-# set_string tbl "b" "Hello";;
-- : unit = ()
-# get_string tbl "b";;
-- : string option = Some "Hello"
-# get_string tbl "a";;
-- : string option = None
-# get_int tbl "a";;
-- : int option = Some 1
-# set_string tbl "a" "Bye";;
-- : unit = ()
-# get_int tbl "a";;
-- : int option = None
-# get_string tbl "a";;
-- : string option = Some "Bye"
+let test_demo () =
+  let inj_int = Mixtbl.access () in
+  let tbl = Mixtbl.create 10 in
+  OUnit.assert_equal None (Mixtbl.get ~inj:inj_int tbl "a");
+  Mixtbl.set inj_int tbl "a" 1;
+  OUnit.assert_equal (Some 1) (Mixtbl.get ~inj:inj_int tbl "a");
+  let inj_string = Mixtbl.access () in
+  Mixtbl.set inj_string tbl "b" "Hello";
+  OUnit.assert_equal (Some "Hello") (Mixtbl.get inj_string tbl "b");
+  OUnit.assert_equal None (Mixtbl.get inj_string tbl "a");
+  OUnit.assert_equal (Some 1) (Mixtbl.get inj_int tbl "a");
+  Mixtbl.set inj_string tbl "a" "Bye";
+  OUnit.assert_equal None (Mixtbl.get inj_int tbl "a");
+  OUnit.assert_equal (Some "Bye") (Mixtbl.get inj_string tbl "a");
+  ()
 ```
